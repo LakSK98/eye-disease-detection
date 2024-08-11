@@ -52,8 +52,6 @@ def localize_disc(image):
     margin = 300
     # Extract the region of interest (ROI) containing the optic disc
     optic_disc_roi = img[y-margin:y+h+margin, x-margin:x+w+margin]
-    # Draw the bounding box on the original image
-    cv2.rectangle(img, (x-margin, y-margin), (x + w + margin, y + h + margin), (0, 255, 0), 2)
     return optic_disc_roi
 
 def segment_adaptive_optic_disc(input_image):
@@ -181,6 +179,7 @@ def segment_optic_cup(image):
 
 def neuroretinal_rim(optic_disc, optic_cup):
   neuroretinal_rim = cv2.bitwise_and(optic_disc, cv2.bitwise_not(optic_cup))
+  neuroretinal_rim = crop_image(neuroretinal_rim)
   return neuroretinal_rim
 
 def istn_masks(neuroretinal_rim_gray):
@@ -211,9 +210,9 @@ def istn_rule(neuroretinal_rim_gray):
   temporal_thickness = np.sum(temporal == 255)
   # Implement the ISNT rule
   if inferior_thickness > superior_thickness > nasal_thickness > temporal_thickness:
-      return 1, inferior_thickness , superior_thickness , nasal_thickness , temporal_thickness
+      return 1, inferior_thickness , superior_thickness , nasal_thickness , temporal_thickness, inferior , superior , nasal , temporal
   else:
-      return 0, inferior_thickness , superior_thickness , nasal_thickness , temporal_thickness
+      return 0, inferior_thickness , superior_thickness , nasal_thickness , temporal_thickness, inferior , superior , nasal , temporal
 
 def segment_ppa(roi, disc_mask):
     contours, _ = cv2.findContours(disc_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -368,7 +367,7 @@ def red_color_features_disc(disc_with_color):
 def density_of_ppa(roi, disc_mask):
     ppa_mask = segment_ppa(roi, disc_mask)
     ppa_density = cv2.countNonZero(ppa_mask) / ppa_mask.size
-    return ppa_density
+    return ppa_density, ppa_mask
 
 def segment_disc_with_color(roi, disc_mask):
     disc_with_color = np.zeros_like(roi)
@@ -383,15 +382,16 @@ def extract_features(img):
     cup = segment_optic_cup(inpainted_disc_seg)
     cdr, vertical_cdr, horizontal_cdr = calculate_cdr(cup, disc)
     neuroretinal_rim_mask = neuroretinal_rim(disc, cup)
-    is_istn_rule_follows, inferior_thickness , superior_thickness , nasal_thickness , temporal_thickness = istn_rule(neuroretinal_rim_mask)
+    is_istn_rule_follows, inferior_thickness , superior_thickness , nasal_thickness , temporal_thickness, inferior , superior , nasal , temporal = istn_rule(neuroretinal_rim_mask)
     average_neuroretinal_rim_thickness = calculate_neuroretinal_rim_thickness(disc, cup)
     disc_assym_vertical, disc_assym_horizontal = disc_assymmetry(disc)
     vessels_density, blood_vessels_mask = blood_vessels_density(img)
     mean_red, std_red, max_red, min_red, skew_red, kurt_red, mean_hue, std_hue, mean_a, std_a = red_color_features_blood_vessels(img, blood_vessels_mask)
-    ppa_density = density_of_ppa(inpainted_roi, disc)
+    ppa_density, ppa_mask = density_of_ppa(inpainted_roi, disc)
     disc_seg = segment_disc_with_color(optic_disc_roi, disc)
     mean_red_disc, std_red_disc, max_red_disc, min_red_disc, skew_red_disc, kurt_red_disc, mean_hue_disc, std_hue_disc, mean_a_disc, std_a_disc = red_color_features_disc(disc_seg)
-    processed_urls = save_images_and_get_urls([optic_disc_roi, disc, cup, inpainted_disc_seg, neuroretinal_rim_mask])
+    processed_urls = save_images_and_get_urls([optic_disc_roi, disc, cup, inpainted_disc_seg, neuroretinal_rim_mask, blood_vessels_mask, inpainted_roi, ppa_mask,
+                                               inferior , superior , nasal , temporal])
     return np.array([cdr, vertical_cdr, horizontal_cdr,
             is_istn_rule_follows, inferior_thickness , superior_thickness , nasal_thickness , temporal_thickness,
             average_neuroretinal_rim_thickness,
