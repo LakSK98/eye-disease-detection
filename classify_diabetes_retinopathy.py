@@ -4,7 +4,7 @@ import joblib
 # Load the classifier
 diabetes_retinopathy_clf = joblib.load('./models/diabetes_retinopathy_classifier.pkl')
 
-disease_types = ["None", "Mild", "Moderate", "Severe", "PDR"]
+disease_types = ["None", "Mild DR", "Moderate DR", "Severe DR", "PDR"]
 
 def predict_diabetes_retinopathy(image):
     features = extract_features(image)
