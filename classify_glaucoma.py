@@ -1,0 +1,12 @@
+import pickle
+from features_extraction_glaucoma import extract_features
+
+with open('./models/glaucoma_classifier.pkl', 'rb') as glaucoma_classifier:
+    glaucoma_clf = pickle.load(glaucoma_classifier)
+
+disease_types = ["Primary Open Angle Glaucoma", "Normal Tension Glaucoma", "Pigmentary Glaucoma"]
+
+def predict_glaucoma(image):
+    features = extract_features(image)
+    prediction = glaucoma_clf.predict([features])
+    return disease_types[prediction[0]], features
