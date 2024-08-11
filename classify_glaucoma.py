@@ -7,6 +7,6 @@ with open('./models/glaucoma_classifier.pkl', 'rb') as glaucoma_classifier:
 disease_types = ["Primary Open Angle Glaucoma", "Normal Tension Glaucoma", "Pigmentary Glaucoma"]
 
 def predict_glaucoma(image):
-    features = extract_features(image)
+    features, processed_urls = extract_features(image)
     prediction = glaucoma_clf.predict([features])
-    return disease_types[prediction[0]], features
+    return disease_types[prediction[0]], features, processed_urls

@@ -1,10 +1,10 @@
-import pickle
 from features_extraction_diabetes_retinopathy import extract_features
+import joblib
 
-with open('./models/diabetes_retinopathy_classifier.pkl', 'rb') as diabetes_retinopathy_classifier:
-    diabetes_retinopathy_clf = pickle.load(diabetes_retinopathy_classifier)
+# Load the classifier
+diabetes_retinopathy_clf = joblib.load('./models/diabetes_retinopathy_classifier.pkl')
 
-disease_types = ["Primary Open Angle Glaucoma", "Normal Tension Glaucoma", "Pigmentary Glaucoma"]
+disease_types = ["None", "Mild", "Moderate", "Severe", "PDR"]
 
 def predict_diabetes_retinopathy(image):
     features = extract_features(image)

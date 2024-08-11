@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import scipy.stats
+from save_processed_images import save_images_and_get_urls
 
 def resize_image(image):
   original_height, original_width = image.shape[:2]
@@ -175,7 +176,8 @@ def segment_optic_cup(image):
     # Reshape the mask to match the original image dimensions
     brightest_cluster_mask = brightest_cluster_mask.reshape(image.shape[:2])
     # Step 4: Return the binary mask of the brightest cluster
-    return brightest_cluster_mask
+    binary_mask = (brightest_cluster_mask * 255).astype(np.uint8)
+    return binary_mask
 
 def neuroretinal_rim(optic_disc, optic_cup):
   neuroretinal_rim = cv2.bitwise_and(optic_disc, cv2.bitwise_not(optic_cup))
@@ -389,6 +391,7 @@ def extract_features(img):
     ppa_density = density_of_ppa(inpainted_roi, disc)
     disc_seg = segment_disc_with_color(optic_disc_roi, disc)
     mean_red_disc, std_red_disc, max_red_disc, min_red_disc, skew_red_disc, kurt_red_disc, mean_hue_disc, std_hue_disc, mean_a_disc, std_a_disc = red_color_features_disc(disc_seg)
+    processed_urls = save_images_and_get_urls([optic_disc_roi, disc, cup, inpainted_disc_seg, neuroretinal_rim_mask])
     return np.array([cdr, vertical_cdr, horizontal_cdr,
             is_istn_rule_follows, inferior_thickness , superior_thickness , nasal_thickness , temporal_thickness,
             average_neuroretinal_rim_thickness,
@@ -396,4 +399,4 @@ def extract_features(img):
             vessels_density,
             mean_red, std_red, max_red, min_red, skew_red, kurt_red, mean_hue, std_hue, mean_a, std_a,
             ppa_density,
-            mean_red_disc, std_red_disc, max_red_disc, min_red_disc, skew_red_disc, kurt_red_disc, mean_hue_disc, std_hue_disc, mean_a_disc, std_a_disc]).flatten()
+            mean_red_disc, std_red_disc, max_red_disc, min_red_disc, skew_red_disc, kurt_red_disc, mean_hue_disc, std_hue_disc, mean_a_disc, std_a_disc]).flatten(), processed_urls
