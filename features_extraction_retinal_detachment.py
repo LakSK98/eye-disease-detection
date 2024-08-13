@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from skimage.feature import local_binary_pattern
+from save_processed_images import save_images_and_get_urls
 
 def segment_retinal_area_rd(image, color='white'):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -238,4 +239,6 @@ def extract_features(img):
     color_percentage, highlighted_image = calculate_color_percentage_trd(img)
     rd_feature.append(color_percentage)
     
-    return rd_feature
+    urls = save_images_and_get_urls([segmented_image, vessel_mask, smoothed_inpainted_img, segmented_dark_spots] + segments)
+
+    return np.array(rd_feature), urls

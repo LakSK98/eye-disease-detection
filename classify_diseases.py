@@ -6,13 +6,13 @@ from extract_other_fundus import extract_common_features
 
 def predict_disease(img):
     predict = None
-    if True:
+    if False:
         predict = predict_glaucoma
-    elif True:
+    elif False:
         predict = predict_diabetes_retinopathy
-    elif 3:
+    elif False:
         predict = predict_cataract
-    elif 4:
+    elif True:
         predict = predict_retinal_detachment
     else:
         predict = extract_common_features
