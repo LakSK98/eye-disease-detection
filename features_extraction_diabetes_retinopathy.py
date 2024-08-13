@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from skimage import color
 from skimage.feature import graycomatrix, graycoprops
+from save_processed_images import save_images_and_get_urls
 
 def resize_image(image, size=(512, 512)):
     return cv2.resize(image, size)
@@ -225,7 +226,7 @@ def detect_hemorrhages(image, blood_vessels, fovea):
     improved_image = remove_fovea_region(difference, fovea)
     hemorrhages, no_of_hmr = filter_components(improved_image)
     hmr_area = np.sum(hemorrhages == 255)
-    return np.array([no_of_hmr, hmr_area])
+    return np.array([no_of_hmr, hmr_area]), hemorrhages
 
 def split_channels(image):
     return cv2.split(image)
@@ -253,7 +254,7 @@ def detect_microaneurysms(image, blood_vessels_image, fovea):
     dilated_image = apply_dilation(improved_image)
     microaneurysms, no_of_ma = filter_small_components(dilated_image)
     ma_area = np.sum(microaneurysms == 255)
-    return np.array([no_of_ma, ma_area])
+    return np.array([no_of_ma, ma_area]), microaneurysms
 
 def convert_to_grayscale(image):
     return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -429,14 +430,17 @@ def extract_features(image):
     optic_disc = segment_optic_disc(image)
     fovea = segment_fovea(image)
     vessels_feature = np.array([vessel_density])
-    microaneurysms_features = detect_microaneurysms(image, vessels, fovea)
-    hemorrhages_features = detect_hemorrhages(image, vessels, fovea)
+    microaneurysms_features, microaneurysms = detect_microaneurysms(image, vessels, fovea)
+    hemorrhages_features, hemorrhages = detect_hemorrhages(image, vessels, fovea)
     exudates_features = detect_exudates(image, optic_disc)
     neovascularization_features = detect_neovascularization(image)
     rgb_std_features = std_rgb(image)
     entropy_g_feature = compute_entropy_g(image)
     texture_features = compute_texture_features(image)
     nv_features = calculate_features(vessels)
+
+    urls = save_images_and_get_urls([vessels, fovea, microaneurysms, hemorrhages ])
+
     # Combine all features into a single feature vector
     features = np.concatenate([
         vessels_feature,
@@ -448,4 +452,5 @@ def extract_features(image):
         entropy_g_feature,
         texture_features,
         nv_features])
-    return features
+    
+    return features, urls

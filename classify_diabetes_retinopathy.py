@@ -7,6 +7,6 @@ diabetes_retinopathy_clf = joblib.load('./models/diabetes_retinopathy_classifier
 disease_types = ["None", "Mild DR", "Moderate DR", "Severe DR", "PDR"]
 
 def predict_diabetes_retinopathy(image):
-    features = extract_features(image)
+    features, urls = extract_features(image)
     prediction = diabetes_retinopathy_clf.predict([features])
-    return disease_types[prediction[0]], features
+    return disease_types[prediction[0]], features, urls

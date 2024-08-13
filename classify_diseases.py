@@ -8,9 +8,9 @@ def predict_disease(img):
     predict = None
     if False:
         predict = predict_glaucoma
-    elif False:
+    elif True:
         predict = predict_diabetes_retinopathy
-    elif False:
+    elif True:
         predict = predict_cataract
     elif True:
         predict = predict_retinal_detachment

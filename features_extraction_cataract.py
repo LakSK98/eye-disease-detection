@@ -4,13 +4,13 @@ from skimage.feature import graycomatrix, graycoprops, local_binary_pattern
 from skimage.measure import shannon_entropy
 from scipy.stats import skew, kurtosis
 from skimage.filters import sobel
+from save_processed_images import save_images_and_get_urls
 
 files_directory = '/content/drive/My Drive/eye_data/Dataset/'
 
 def preprocess_image(image):
-    if image is None:
-        raise ValueError("Image could not be loaded. Please check the path.")
-    return cv2.cvtColor(image, cv2.IMREAD_GRAYSCALE)
+    image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+    return image
 
 def measure_opacity(image, mask=None):
     if mask is not None:
@@ -122,6 +122,9 @@ def extract_features(image):
     mean_gradient, std_gradient = extract_gradient_features(color_img)
     skewness, kurt = extract_histogram_features(color_img)
     local_binary_patterns = extract_lbp_features(img)
+
+    urls = save_images_and_get_urls([img, background_mask, mask, vessels_image, mask_])
+
     return np.array([central_opacity, overall_opacity, vessel_area_ratio,
                      mean_blue, median_blue, std_blue, brightness_blue, mean_green,
                      median_green, std_green, brightness_green, mean_red, median_red, std_red, brightness_red,
@@ -130,4 +133,4 @@ def extract_features(image):
                      mean_gradient, std_gradient,
                      skewness, kurt,
                      *local_binary_patterns
-                     ]).flatten()
+                     ]).flatten(), urls
