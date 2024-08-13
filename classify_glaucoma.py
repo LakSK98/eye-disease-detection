@@ -9,4 +9,4 @@ disease_types = ["Primary Open Angle Glaucoma", "Normal Tension Glaucoma", "Pigm
 def predict_glaucoma(image):
     features, processed_urls = extract_features(image)
     prediction = glaucoma_clf.predict([features])
-    return disease_types[prediction[0]], features, processed_urls
+    return "Glaucoma", disease_types[int(prediction[0])], features, processed_urls

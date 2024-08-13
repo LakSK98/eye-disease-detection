@@ -12,6 +12,7 @@ CORS(app)
 def predict():
     if "image" not in request.files:
         return jsonify({"error": "No any Image fiiles in your request."}), 400
+    file1 = int(request.args.get('file'))
     file = request.files["image"]
     if file.filename == "":
         return jsonify({"error": "Proide a valid file."}), 400
@@ -19,10 +20,11 @@ def predict():
     image = Image.open(BytesIO(image_stream)).convert("RGB")
     image = np.array(image)
     try:
-        prediction, features, processed_urls = predict_disease(image)
+        disease, prediction, features, processed_urls = predict_disease(image, file1)
         return jsonify(
             {
                 "features": features.tolist(),
+                "disease": disease,
                 "prediction": prediction,
                 "urls": processed_urls,
             }

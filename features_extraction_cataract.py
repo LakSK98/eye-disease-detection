@@ -6,8 +6,6 @@ from scipy.stats import skew, kurtosis
 from skimage.filters import sobel
 from save_processed_images import save_images_and_get_urls
 
-files_directory = '/content/drive/My Drive/eye_data/Dataset/'
-
 def preprocess_image(image):
     image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
     return image

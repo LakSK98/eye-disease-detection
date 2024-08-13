@@ -1,2 +1,4 @@
+import numpy as np
+
 def extract_common_features(img):
-    return None
+    return "Other", "", np.array([]), []

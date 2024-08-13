@@ -9,4 +9,4 @@ disease_types = ["None", "Mild DR", "Moderate DR", "Severe DR", "PDR"]
 def predict_diabetes_retinopathy(image):
     features, urls = extract_features(image)
     prediction = diabetes_retinopathy_clf.predict([features])
-    return disease_types[prediction[0]], features, urls
+    return "Diabetes Retinopathy", disease_types[int(prediction[0])], features, urls
