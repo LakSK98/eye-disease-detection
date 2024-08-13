@@ -161,16 +161,6 @@ def create_central_mask(image):
     cv2.circle(mask, center, radius, 255, -1)
     return mask
 
-def resize_image(image):
-  original_height, original_width = image.shape[:2]
-  # Conditionally upscale the image if width or height is below 1000 pixels
-  if original_width < 1000 or original_height < 1000:
-    upscale_factor = 3
-    upscaled_width = original_width * upscale_factor
-    upscaled_height = original_height * upscale_factor
-    image = cv2.resize(image, (upscaled_width, upscaled_height), interpolation=cv2.INTER_CUBIC)
-  return image
-
 def apply_fundus_mask(image, margin):
   gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
   _, thresholded = cv2.threshold(gray, 10, 255, cv2.THRESH_BINARY)

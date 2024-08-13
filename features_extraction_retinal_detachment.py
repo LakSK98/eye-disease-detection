@@ -219,8 +219,10 @@ def extract_features(img):
     segments = divide_into_segments_rd(vessel_mask, center)
     rd_feature = []
     density_list = []
+    vessels_segments = []
     for i, segment in enumerate(segments):
         segmented_image = cv2.bitwise_and(vessel_mask, vessel_mask, mask=segment)
+        vessels_segments.append(segmented_image)
         density = calculate_vessel_density_rd(segmented_image)
         density_list.append(density)
         rd_feature.append(density)
@@ -239,6 +241,6 @@ def extract_features(img):
     color_percentage, highlighted_image = calculate_color_percentage_trd(img)
     rd_feature.append(color_percentage)
     
-    urls = save_images_and_get_urls([segmented_image, vessel_mask, smoothed_inpainted_img, segmented_dark_spots] + segments)
+    urls = save_images_and_get_urls([segmented_image, mask, vessel_mask, smoothed_inpainted_img, segmented_dark_spots, exudate_mask, highlighted_image, brightened] + vessels_segments)
 
     return np.array(rd_feature), urls

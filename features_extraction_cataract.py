@@ -96,6 +96,26 @@ def extract_lbp_features(image):
     lbp_hist /= (lbp_hist.sum() + 1e-6)
     return lbp_hist.flatten()
 
+def segment_image_blur(image):
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    # Apply Contrast Limited Adaptive Histogram Equalization (CLAHE)
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    clahe_img = clahe.apply(gray)
+    # Apply Gaussian Blur
+    image_blur = cv2.GaussianBlur(clahe_img, (5, 5), 0)
+    _, darkest_areas = cv2.threshold(image_blur, 50, 255, cv2.THRESH_BINARY_INV)
+    # Find contours of the darkest areas
+    contours, _ = cv2.findContours(darkest_areas, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # Draw contours on the original image
+    contour_image = cv2.drawContours(image.copy(), contours, -1, (0, 255, 0), 1)
+    # Otsu's thresholding to binarize the image
+    _, image_thresh = cv2.threshold(image_blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    # Create a morphological kernel
+    kernel = np.ones((21, 21), np.uint8)
+    # Apply morphological closing
+    image_closed = cv2.morphologyEx(darkest_areas, cv2.MORPH_OPEN, kernel)
+    return image_closed
+
 def extract_features(image):
     color_img = image
     img = preprocess_image(image)
@@ -120,8 +140,9 @@ def extract_features(image):
     mean_gradient, std_gradient = extract_gradient_features(color_img)
     skewness, kurt = extract_histogram_features(color_img)
     local_binary_patterns = extract_lbp_features(img)
+    image_blur = segment_image_blur(image)
 
-    urls = save_images_and_get_urls([img, background_mask, mask, vessels_image, mask_])
+    urls = save_images_and_get_urls([img, background_mask, mask, vessels_image, mask_, image_blur])
 
     return np.array([central_opacity, overall_opacity, vessel_area_ratio,
                      mean_blue, median_blue, std_blue, brightness_blue, mean_green,
